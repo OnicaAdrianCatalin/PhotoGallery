@@ -14,8 +14,15 @@ import retrofit2.Response
 class PhotoGalleryRepository(private val flickrApi: FlickrApi) {
 
     fun fetchPhotos(): LiveData<List<GalleryItem>> {
+        return fetchPhotosMetadata(flickrApi.fetchPhotos())
+    }
+
+    fun searchPhotos(query: String): LiveData<List<GalleryItem>> {
+        return fetchPhotosMetadata(flickrApi.searchPhotos(query))
+    }
+
+    private fun fetchPhotosMetadata(flickrRequest: Call<FlickrResponse>): LiveData<List<GalleryItem>> {
         val responseLiveData: MutableLiveData<List<GalleryItem>> = MutableLiveData()
-        val flickrRequest: Call<FlickrResponse> = flickrApi.fetchPhotos()
 
         flickrRequest.enqueue(object : Callback<FlickrResponse> {
 
