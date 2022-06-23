@@ -13,12 +13,20 @@ import retrofit2.Response
 
 class PhotoGalleryRepository(private val flickrApi: FlickrApi) {
 
+    fun fetchPhotosRequest(): Call<FlickrResponse> {
+        return flickrApi.fetchPhotos()
+    }
+
     fun fetchPhotos(): LiveData<List<GalleryItem>> {
-        return fetchPhotosMetadata(flickrApi.fetchPhotos())
+        return fetchPhotosMetadata(fetchPhotosRequest())
+    }
+
+    fun searchPhotosRequest(query: String): Call<FlickrResponse> {
+        return flickrApi.searchPhotos(query)
     }
 
     fun searchPhotos(query: String): LiveData<List<GalleryItem>> {
-        return fetchPhotosMetadata(flickrApi.searchPhotos(query))
+        return fetchPhotosMetadata(searchPhotosRequest(query))
     }
 
     private fun fetchPhotosMetadata(flickrRequest: Call<FlickrResponse>): LiveData<List<GalleryItem>> {

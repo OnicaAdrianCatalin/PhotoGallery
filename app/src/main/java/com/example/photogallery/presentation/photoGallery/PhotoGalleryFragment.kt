@@ -12,8 +12,16 @@ import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.work.Constraints
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.NetworkType
+import androidx.work.PeriodicWorkRequest
+import androidx.work.WorkManager
 import com.example.photogallery.R
+import com.example.photogallery.data.PollWorker
+import com.example.photogallery.data.QueryPreferences
 import com.example.photogallery.databinding.FragmentPhotoGalleryBinding
+import java.util.concurrent.TimeUnit
 
 class PhotoGalleryFragment : Fragment() {
 
@@ -51,6 +59,15 @@ class PhotoGalleryFragment : Fragment() {
         super.onCreateOptionsMenu(menu, inflater)
         inflater.inflate(R.menu.menu_photo_gallery, menu)
         setUpSearchView(menu)
+
+        val toggleItem = menu.findItem(R.id.menu_item_toggle_polling)
+        val isPolling = QueryPreferences.isPolling(requireContext())
+        val toggleItemTitle = if (isPolling) {
+            R.string.stop_polling
+        } else {
+            R.string.start_polling
+        }
+        toggleItem.setTitle(toggleItemTitle)
     }
 
     private fun setUpSearchView(menu: Menu) {
@@ -82,13 +99,42 @@ class PhotoGalleryFragment : Fragment() {
                 viewModel.fetchPhotos("")
                 true
             }
+            R.id.menu_item_toggle_polling -> {
+                onPollingItemClick()
+                return true
+            }
             else -> super.onOptionsItemSelected(item)
         }
     }
 
+    private fun onPollingItemClick() {
+        val isPolling = QueryPreferences.isPolling(requireContext())
+        if (isPolling) {
+            WorkManager.getInstance(requireContext()).cancelUniqueWork(POLL_WORK)
+            QueryPreferences.setPolling(requireContext(), false)
+        } else {
+            val constraints = Constraints.Builder()
+                .setRequiredNetworkType(NetworkType.UNMETERED)
+                .build()
+            val periodicRequest = PeriodicWorkRequest
+                .Builder(PollWorker::class.java, REPEAT_INTERVAL, TimeUnit.MINUTES)
+                .setConstraints(constraints)
+                .build()
+            WorkManager.getInstance(requireContext()).enqueueUniquePeriodicWork(
+                POLL_WORK,
+                ExistingPeriodicWorkPolicy.KEEP,
+                periodicRequest
+            )
+            QueryPreferences.setPolling(requireContext(), true)
+        }
+        activity?.invalidateOptionsMenu()
+    }
+
     companion object {
         private const val SPAN_COUNT = 3
+        private const val REPEAT_INTERVAL = 15L
         private const val TAG = "PhotoGalleryFragment"
+        private const val POLL_WORK = "POLL_WORK"
 
         fun newInstance() = PhotoGalleryFragment()
     }
