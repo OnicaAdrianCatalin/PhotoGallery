@@ -9,7 +9,6 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.SearchView
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.work.Constraints
@@ -21,9 +20,10 @@ import com.example.photogallery.R
 import com.example.photogallery.data.PollWorker
 import com.example.photogallery.data.QueryPreferences
 import com.example.photogallery.databinding.FragmentPhotoGalleryBinding
+import com.example.photogallery.presentation.PollNotificationHandlerFragment
 import java.util.concurrent.TimeUnit
 
-class PhotoGalleryFragment : Fragment() {
+class PhotoGalleryFragment : PollNotificationHandlerFragment() {
 
     private lateinit var binding: FragmentPhotoGalleryBinding
     private val viewModel: PhotoGalleryViewModel by lazy {
