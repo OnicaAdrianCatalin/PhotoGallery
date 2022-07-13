@@ -18,6 +18,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.PhotoGallery">
         <activity
+            android:name=".PhotoPageActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:exported="false" />
+        <activity
             android:name=".presentation.PhotoGalleryActivity"
             android:exported="true">
             <intent-filter>
@@ -26,6 +30,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <receiver
             android:name=".data.NotificationReceiver"
             android:exported="false"
